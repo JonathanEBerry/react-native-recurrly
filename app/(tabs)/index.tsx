@@ -14,6 +14,13 @@ import { FlatList, Image, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 const SafeAreaView = styled(RNSafeAreaView);
 
+/**
+ * Render the subscriptions home screen showing user avatar/name, balance, upcoming items, and all subscriptions.
+ *
+ * The component derives the current user's avatar and display name from Clerk's user object and manages which subscription card is expanded via internal state. It includes a horizontal list of upcoming subscriptions and a vertical list of all subscriptions.
+ *
+ * @returns The rendered React element for the subscriptions home screen.
+ */
 export default function App() {
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();

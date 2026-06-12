@@ -13,6 +13,13 @@ import {
     View,
 } from 'react-native';
 
+/**
+ * Renders the sign-in screen, collecting email and password and handling Clerk authentication and post-sign-in navigation.
+ *
+ * Uses Clerk's sign-in flow to submit credentials, trigger email-based MFA when required, verify MFA codes, and navigate to the app root on successful sign-in.
+ *
+ * @returns The React element for the sign-in UI.
+ */
 export default function SignIn() {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();

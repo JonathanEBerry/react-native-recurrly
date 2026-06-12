@@ -13,6 +13,15 @@ import {
     View,
 } from 'react-native';
 
+/**
+ * Renders the app's sign-up screen and manages the email/password sign-up and email verification flows.
+ *
+ * Displays either an email/password form or a verification-code entry depending on the sign-up state,
+ * submits credentials to start sign-up, sends and verifies email codes, finalizes the sign-up when complete,
+ * and navigates to the app root unless a pending session task is present.
+ *
+ * @returns A React element representing the sign-up screen UI.
+ */
 export default function SignUp() {
   const { signUp, errors, fetchStatus } = useSignUp();
   const router = useRouter();

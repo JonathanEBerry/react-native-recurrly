@@ -5,6 +5,14 @@ import { styled } from "nativewind";
 import { Text } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 const SafeAreaView = styled(RNSafeAreaView);
+/**
+ * Render the application's root screen containing branding and primary navigation links.
+ *
+ * Renders a styled safe-area container with a heading and navigation Links for onboarding, sign-in, sign-up,
+ * a Spotify subscription route, and a dynamic subscription route for a specific id.
+ *
+ * @returns The React element for the app's main screen
+ */
 export default function App() {
   return (
     <SafeAreaView className="flex-1 bg-background p-5">

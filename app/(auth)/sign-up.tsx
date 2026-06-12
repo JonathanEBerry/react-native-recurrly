@@ -37,26 +37,35 @@ export default function SignUp() {
   };
 
   const handleVerify = async () => {
-    await signUp.verifications.verifyEmailCode({ code });
+    if (!code) {
+      return;
+    }
 
-    if (signUp.status === 'complete') {
-      await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
-          }
+    try {
+      await signUp.verifications.verifyEmailCode({ code });
 
-          const url = decorateUrl('/');
-          router.push(url);
-        },
-      });
-    } else {
-      console.error('Sign-up attempt not complete:', signUp);
+      if (signUp.status === 'complete') {
+        await signUp.finalize({
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              console.log(session?.currentTask);
+              return;
+            }
+
+            const url = decorateUrl('/');
+            router.push(url);
+          },
+        });
+      } else {
+        console.error('Sign-up attempt not complete after verify:', signUp);
+      }
+    } catch (e) {
+      console.error('Verification failed:', e);
     }
   };
 
   const isDisabled = !emailAddress || !password || fetchStatus === 'fetching';
+  const isVerifyDisabled = !code || fetchStatus === 'fetching';
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -92,11 +101,11 @@ export default function SignUp() {
                   keyboardType="numeric"
                   autoCapitalize="none"
                 />
-                {errors.fields.code && <Text style={styles.error}>{errors.fields.code.message}</Text>}
+                {errors?.fields?.code && <Text style={styles.error}>{errors.fields.code.message}</Text>}
                 <Pressable
-                  style={({ pressed }) => [styles.button, isDisabled && styles.buttonDisabled, pressed && styles.buttonPressed]}
+                  style={({ pressed }) => [styles.button, isVerifyDisabled && styles.buttonDisabled, pressed && styles.buttonPressed]}
                   onPress={handleVerify}
-                  disabled={isDisabled}
+                  disabled={isVerifyDisabled}
                 >
                   <Text style={styles.buttonText}>Verify</Text>
                 </Pressable>

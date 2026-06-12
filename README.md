@@ -56,3 +56,8 @@ Join our community of developers creating universal apps.
 # react-native-recurrly
 "# react-native-recurrly" 
 "# react-native-recurrly"
+## Environment variables & secrets
+
+- Copy `.env.example` to `.env` for local development and fill in your values.
+- Do not commit `.env` — it is ignored by `.gitignore`.
+- Configure your CI / deployment pipelines to inject `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` (and other secrets) via encrypted secrets or environment settings instead of committing them to the repository.

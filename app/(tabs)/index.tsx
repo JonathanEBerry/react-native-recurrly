@@ -1,7 +1,7 @@
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import { HOME_BALANCE, HOME_SUBSCRIPTIONS, HOME_USER, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import "@/global.css";
@@ -18,7 +18,7 @@ export default function App() {
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
   const { isLoaded, isSignedIn, user } = useUser();
   const avatarSource = user?.imageUrl ? { uri: user.imageUrl } : images.avatar;
-  const displayName = user?.fullName || user?.firstName || HOME_USER.name;
+  const displayName = user?.fullName || user?.firstName || user?.email || 'Account';
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">

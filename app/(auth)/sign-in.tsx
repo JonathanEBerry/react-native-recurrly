@@ -19,6 +19,8 @@ export default function SignIn() {
   const [emailAddress, setEmailAddress] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
+  const [showCodeEntry, setShowCodeEntry] = React.useState(false);
+  const [showSecondFactor, setShowSecondFactor] = React.useState(false);
 
   const handleSubmit = async () => {
     const { error } = await signIn.password({
@@ -44,31 +46,48 @@ export default function SignIn() {
         },
       });
     } else if (signIn.status === 'needs_client_trust') {
-      await signIn.mfa.sendEmailCode();
+      // request an email MFA code and show the code entry UI
+      try {
+        await signIn.mfa.sendEmailCode();
+      } catch (e) {
+        console.warn('Failed to send email code for client trust:', e);
+      }
+      setShowCodeEntry(true);
     } else if (signIn.status === 'needs_second_factor') {
-      // Add second-factor handling if needed.
+      // Enter second-factor flow: show a basic method prompt and code entry.
+      // Try to request an email MFA code if available, otherwise present UI.
+      try {
+        await signIn.mfa.sendEmailCode();
+      } catch (e) {
+        console.warn('Failed to send second-factor email code:', e);
+      }
+      setShowSecondFactor(true);
     } else {
       console.error('Sign-in attempt not complete:', signIn);
     }
   };
 
   const handleVerify = async () => {
-    await signIn.mfa.verifyEmailCode({ code });
+    try {
+      await signIn.mfa.verifyEmailCode({ code });
 
-    if (signIn.status === 'complete') {
-      await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
-          }
+      if (signIn.status === 'complete') {
+        await signIn.finalize({
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              console.log(session?.currentTask);
+              return;
+            }
 
-          const url = decorateUrl('/');
-          router.push(url);
-        },
-      });
-    } else {
-      console.error('Sign-in attempt not complete:', signIn);
+            const url = decorateUrl('/');
+            router.push(url);
+          },
+        });
+      } else {
+        console.error('Sign-in attempt not complete after verify:', signIn);
+      }
+    } catch (e) {
+      console.error('Verification failed:', e);
     }
   };
 
@@ -95,40 +114,69 @@ export default function SignIn() {
             <Text style={styles.heading}>Welcome back</Text>
             <Text style={styles.subheading}>Sign in to continue managing subscriptions.</Text>
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                autoCapitalize="none"
-                value={emailAddress}
-                placeholder="Enter your email"
-                placeholderTextColor="#9A9A9A"
-                onChangeText={setEmailAddress}
-                keyboardType="email-address"
-              />
-              {errors.fields.identifier && <Text style={styles.error}>{errors.fields.identifier.message}</Text>}
-            </View>
+            {(showCodeEntry || showSecondFactor) ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={code}
+                  placeholder="Enter your verification code"
+                  placeholderTextColor="#9A9A9A"
+                  onChangeText={setCode}
+                  keyboardType="numeric"
+                  autoCapitalize="none"
+                />
+                {errors.fields?.code && <Text style={styles.error}>{errors.fields.code.message}</Text>}
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                placeholder="Enter your password"
-                placeholderTextColor="#9A9A9A"
-                secureTextEntry
-                onChangeText={setPassword}
-              />
-              {errors.fields.password && <Text style={styles.error}>{errors.fields.password.message}</Text>}
-            </View>
+                <Pressable
+                  style={({ pressed }) => [styles.button, !code && styles.buttonDisabled, pressed && styles.buttonPressed]}
+                  onPress={handleVerify}
+                  disabled={!code}
+                >
+                  <Text style={styles.buttonText}>Verify</Text>
+                </Pressable>
 
-            <Pressable
-              style={({ pressed }) => [styles.button, isDisabled && styles.buttonDisabled, pressed && styles.buttonPressed]}
-              onPress={handleSubmit}
-              disabled={isDisabled}
-            >
-              <Text style={styles.buttonText}>Sign in</Text>
-            </Pressable>
+                <Pressable style={{ alignItems: 'center', marginTop: 14 }} onPress={() => signIn.mfa.sendEmailCode()}>
+                  <Text style={{ color: '#F27A4C', fontWeight: '700' }}>I need a new code</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    autoCapitalize="none"
+                    value={emailAddress}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#9A9A9A"
+                    onChangeText={setEmailAddress}
+                    keyboardType="email-address"
+                  />
+                  {errors?.fields?.identifier && <Text style={styles.error}>{errors.fields.identifier.message}</Text>}
+                </View>
+
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Password</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={password}
+                    placeholder="Enter your password"
+                    placeholderTextColor="#9A9A9A"
+                    secureTextEntry
+                    onChangeText={setPassword}
+                  />
+                  {errors?.fields?.password && <Text style={styles.error}>{errors.fields.password.message}</Text>}
+                </View>
+
+                <Pressable
+                  style={({ pressed }) => [styles.button, isDisabled && styles.buttonDisabled, pressed && styles.buttonPressed]}
+                  onPress={handleSubmit}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>Sign in</Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           <View style={styles.footer}>

@@ -7,6 +7,14 @@ import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
+/**
+ * App root layout that loads application fonts, controls the splash screen visibility, validates the Clerk publishable key, and provides the authenticated navigation stack.
+ *
+ * Loads PlusJakartaSans font weights and hides the splash screen once fonts are ready; renders nothing until fonts finish loading. Reads `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` and initializes a `ClerkProvider` with `tokenCache`, wrapping the app `Stack` with headers disabled.
+ *
+ * @returns The root React element composing `ClerkProvider` with the app navigation `Stack`.
+ * @throws Error if `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` is not set.
+ */
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     'sans-regular': require('../assets/fonts/PlusJakartaSans-Regular.ttf'),
